@@ -22,6 +22,17 @@ The goal was to check whether the new layout increases monetization without caus
 └── svg/
 ```
 
+## Data source
+
+The dataset comes from an A/B experiment conducted on the **Marketpele Feed** platform, which helps publishers monetize their content through advertising.
+
+The feed contains:
+
+* **Paid elements** — advertisements that generate revenue when users click through to the advertiser’s page
+* **Organic elements** — publisher content that redirects users to another article from the same publisher
+
+The dataset contains aggregated experiment results for comparing different ordering strategies for paid and organic content.
+
 ## Metrics
 
 The analysis focuses on ratio metrics:
