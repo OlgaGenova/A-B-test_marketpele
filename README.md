@@ -1,11 +1,15 @@
 # A/B Test Analysis — Marketpele Feed Ranking
 
-This project analyzes an A/B test for changing the order of paid and organic elements in a content feed.
+This analysis evaluates an experiment that changed the order of paid and organic elements in a content feed.
 
 - **Group A**: organic content shown before paid elements
 - **Group B**: paid elements moved higher in the feed
 
 The goal was to check whether the new layout increases monetization without causing unacceptable deterioration in user engagement.
+
+## Report
+
+**[View the full A/B test report](./AB_test_Marketpele_Olga_Genova.pdf)**
 
 ## Project structure
 
