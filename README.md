@@ -90,3 +90,11 @@ A full rollout of such an aggressive layout change is risky. A better next step 
 - seaborn
 - Jupyter Notebook
 - paired Poisson bootstrap
+
+
+
+AI diagnostic → hypothesis about platform heterogeneity
+→ AI-generated implementation
+→ methodological review
+→ corrected cluster bootstrap
+→ validated interaction analysis
