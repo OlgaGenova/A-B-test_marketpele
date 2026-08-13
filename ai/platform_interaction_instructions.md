@@ -1,53 +1,22 @@
 # Platform Interaction Analysis
 
-Generalize and maintain the platform interaction analysis in:
+Maintain the platform interaction analysis in:
 
 `03_platform_interaction.ipynb`
 
-Do not rewrite the notebook from scratch.
+Use the source dataset:
+
+`csv/marketpele_ab_test_data_set.csv`
 
 The source data are already aggregated at:
 
 `date × publisher_id × platform × group_name`
 
-The purpose of this notebook is to test whether treatment effects differ between Mobile and Desktop for the experiment metrics.
-
-## Core methodology
-
-Preserve the following methodology:
-
-- A/B values are aligned within each available `date × publisher_id × platform` block;
-- the bootstrap resampling unit is `date × publisher_id`;
-- one common cluster draw is reused for Mobile and Desktop within each bootstrap iteration;
-- when a sampled cluster contains both Mobile and Desktop, both platform blocks must be included together;
-- when a sampled cluster contains only one platform, only the available platform contributes;
-- Mobile and Desktop must NOT be resampled independently;
-- A/B pairing must remain preserved;
-- all available data must be used;
-- do not restrict the main analysis to only fully matched Mobile/Desktop clusters;
-- ratio metrics must be calculated as ratio of sums, not as means of block-level ratios.
-
-The interaction must be evaluated directly as:
-
-`(B - A)_Mobile - (B - A)_Desktop`
-
-Do not infer platform interaction from separate Mobile and Desktop significance results.
+The purpose of this analysis is to test whether treatment effects differ between Mobile and Desktop.
 
 ## Metrics
 
-Run the interaction analysis for exactly these five metrics:
-
-1. RPM
-2. RPS
-3. Paid CTR
-4. Organic CTR
-5. Pages per Session
-
-Use the same metric definitions as in the existing analysis notebooks.
-
-Do not invent or change metric formulas.
-
-Use the following configurations:
+Analyze exactly these five metrics using the same definitions as in the existing analysis:
 
 - RPM = `revenue / pageviews * 1000`
 - RPS = `revenue / sessions * 1000`
@@ -55,17 +24,23 @@ Use the following configurations:
 - Organic CTR = `organic_clicks / visible_pageviews * 100`
 - Pages per Session = `pageviews / sessions`
 
-For each metric, calculate the value as a ratio of sums within the bootstrap sample.
+Calculate every metric as a **ratio of sums**, not as a mean of block-level ratios.
 
-## Platform-block alignment
+Do not change metric definitions.
 
-Align the existing A/B rows using `pivot`, not a new aggregation step.
+For Paid CTR and Organic CTR, treatment effects and interactions are expressed in **percentage points**, not relative percentages.
+
+## Data alignment
+
+Align A/B rows within each existing:
+
+`date × publisher_id × platform`
+
+block using `pivot`.
 
 Do not re-aggregate the already aggregated source data.
 
-The aligned block level must remain:
-
-`date × publisher_id × platform`
+Each aligned platform block must preserve the A/B pairing.
 
 ## Cluster construction
 
@@ -73,86 +48,89 @@ Construct bootstrap clusters at:
 
 `date × publisher_id`
 
-When detecting whether a platform is present in a cluster, use an explicit stable column:
+When detecting whether a platform is available in a cluster, use:
 
 `pageviews_A_{platform}`
 
-Do not use an implicit expression such as `VALUE_COLUMNS[0]`, because its value depends on column ordering.
+Do not depend on column ordering such as `VALUE_COLUMNS[0]`.
 
-Missing values for an unavailable platform may be zero-filled only after platform presence has been explicitly identified and validated.
+A cluster may contain:
 
-The zero-filled values must represent absence of that platform from the cluster and must contribute zero to both numerator and denominator sums.
+- both Mobile and Desktop;
+- only Mobile;
+- only Desktop.
 
-## Bootstrap implementation
+If a platform is unavailable for a cluster, its metric input values may be zero-filled only after its absence has been explicitly identified and validated.
+
+These zeros represent absence of the platform and must contribute zero to numerator and denominator sums.
+
+## Bootstrap methodology
 
 Use:
 
-- `n_bootstrap = 10_000`
-- `seed = 42`
-- 95% percentile bootstrap confidence intervals
+- bootstrap unit: `date × publisher_id`;
+- `n_bootstrap = 10_000`;
+- `seed = 42`;
+- 95% percentile bootstrap confidence intervals.
 
-Reuse one common bootstrap draw of `date × publisher_id` clusters for:
+Use one common cluster draw within each bootstrap iteration for:
 
-- both platforms;
-- both experiment groups;
+- Mobile and Desktop;
+- A and B;
 - all five metrics.
 
-This common draw must preserve the existing dependence for clusters where Mobile and Desktop are both available.
+Therefore:
 
-Add protection against:
+- shared Mobile/Desktop clusters must remain together;
+- Mobile and Desktop must NOT be resampled independently;
+- A/B pairing must remain preserved;
+- all available clusters must be used;
+- do not restrict the analysis to only fully matched Mobile/Desktop clusters.
+
+Protect against:
 
 - zero denominators;
 - non-finite denominators;
 - non-finite metric values.
 
-Do not silently return `NaN` or infinite values.
+If a bootstrap draw contains an invalid denominator for any required metric/platform/group combination, reject that draw.
 
-If a generated bootstrap draw has an invalid denominator for any required metric/platform/group combination, reject that draw.
-
-Track the total number of rejected bootstrap draws in:
+Track rejected draws as:
 
 `n_rejected_bootstrap_draws`
 
-Report this diagnostic clearly after the bootstrap finishes and include it in the returned metadata/results.
+Report the rejection count as a diagnostic and include it in the returned results.
 
-The rejection count is diagnostic only. Do not alter the statistical interpretation based on it unless the number of rejected draws is unexpectedly large.
+Do not silently return `NaN` or infinite values.
 
-Do not keep unused intermediate variables such as `bootstrap_effects` if they are not referenced by the implementation.
+## Interaction estimand
 
-## Primary estimand
+For each metric calculate:
 
-For each metric, calculate:
+`Mobile treatment effect = Metric_B_Mobile - Metric_A_Mobile`
 
-### Mobile treatment effect
+`Desktop treatment effect = Metric_B_Desktop - Metric_A_Desktop`
 
-`Metric_B_Mobile - Metric_A_Mobile`
+and evaluate the platform interaction directly as:
 
-### Desktop treatment effect
+`(B - A)_Mobile - (B - A)_Desktop`
 
-`Metric_B_Desktop - Metric_A_Desktop`
+The interaction is evaluated on the **absolute metric scale**.
 
-### Platform interaction
+Do not replace it with a difference in relative percentage uplifts.
 
-`Mobile treatment effect - Desktop treatment effect`
+Do not infer platform interaction from separate Mobile and Desktop significance results.
 
-The primary interaction is evaluated on the absolute metric scale.
-
-Do not replace this with a difference in relative percentage uplifts.
-
-Relative percentage changes may be reported separately as descriptive information, but they must not replace the primary interaction estimand.
-
-For Paid CTR and Organic CTR, because the multiplier is `100`, absolute treatment effects and interaction estimates are expressed in **percentage points**, not relative percentages.
-
-## Required output
+## Required Python output
 
 For every metric return:
 
 - Metric A Mobile
 - Metric B Mobile
-- Mobile treatment effect `(B - A)`
+- Mobile treatment effect
 - Metric A Desktop
 - Metric B Desktop
-- Desktop treatment effect `(B - A)`
+- Desktop treatment effect
 - observed interaction
 - 95% bootstrap CI lower
 - 95% bootstrap CI upper
@@ -167,11 +145,11 @@ Keep the full bootstrap interaction distribution available in the returned Pytho
 
 `bootstrap_interaction`
 
-Do not include the full distribution in the human-readable summary table.
+Do not include the full bootstrap distribution in human-readable outputs or JSON.
 
 ## Summary table
 
-Create one compact DataFrame with one row per metric and the following columns:
+Create one compact DataFrame with one row per metric and columns:
 
 - Metric
 - Mobile A
@@ -185,44 +163,61 @@ Create one compact DataFrame with one row per metric and the following columns:
 - CI upper
 - CI crosses zero
 
+## Output artifact
+
+After the analysis completes successfully, save the compact scalar results to:
+
+`outputs/platform_interaction_results.json`
+
+The JSON must contain, for every metric:
+
+- metric name;
+- Mobile A;
+- Mobile B;
+- Mobile treatment effect;
+- Desktop A;
+- Desktop B;
+- Desktop treatment effect;
+- observed interaction;
+- 95% bootstrap CI lower;
+- 95% bootstrap CI upper;
+- whether the CI crosses zero;
+- number of Mobile blocks;
+- number of Desktop blocks;
+- number of bootstrap iterations;
+- number of `date × publisher_id` clusters;
+- number of rejected bootstrap draws.
+
+Do not include `bootstrap_interaction` arrays in the JSON.
+
+Do not modify any other files in `outputs/`.
+
 ## Validation
 
-The generalized implementation must reproduce the previously validated RPM result approximately:
+Before treating the analysis as complete:
 
-- RPM A Mobile ≈ `1.485335`
-- RPM B Mobile ≈ `1.831176`
-- Mobile treatment effect ≈ `0.345842`
-- RPM A Desktop ≈ `1.688332`
-- RPM B Desktop ≈ `1.766317`
-- Desktop treatment effect ≈ `0.077985`
-- observed interaction ≈ `0.267856`
-- 95% CI approximately `[-0.0067, 0.5950]`
+- verify that the notebook executes successfully;
+- verify that all five metrics are produced;
+- verify that no non-finite metric values are returned;
+- verify that rejected bootstrap draws are reported;
+- verify that the interaction confidence interval is calculated directly from the bootstrap interaction distribution;
+- compare the generated results with the existing validated notebook output and investigate any material discrepancy.
 
-Small Monte Carlo differences are acceptable.
-
-If the RPM result changes materially, stop and investigate the implementation instead of continuing.
+Do not change the statistical methodology merely to force results to match previous values.
 
 ## Interpretation
 
-Interpret interaction directly from its bootstrap confidence interval.
+Interpret each platform interaction from its own bootstrap confidence interval.
 
-Do not use separate platform significance results as evidence that platform effects differ.
+If the confidence interval includes zero, state that the available data do not provide sufficient evidence that treatment effects differ between platforms for that metric.
 
-The current validated results should be interpreted as follows:
+If the confidence interval excludes zero, describe the direction of the observed platform heterogeneity.
 
-- RPS shows evidence of a stronger positive treatment effect on Mobile than on Desktop;
-- Paid CTR shows evidence of a stronger positive treatment effect on Mobile than on Desktop;
-- Organic CTR shows evidence of a stronger negative treatment effect on Mobile than on Desktop;
-- RPM does not provide sufficient evidence of a platform difference because the interaction CI includes zero;
-- Pages per Session does not provide sufficient evidence of a platform difference because the interaction CI includes zero.
+Do not make causal claims about platform moderation.
 
-For Paid CTR and Organic CTR, report treatment effects and interactions in percentage points.
+Mobile and Desktop are not fully matched by `date × publisher_id`, so observed interactions may partly reflect differences in publisher/date composition.
 
-Do not make causal claims.
-
-Mobile and Desktop are not fully matched by `date × publisher_id`, so observed interactions may partly reflect publisher/date composition differences between the platform samples.
-
-Therefore, treat the results as exploratory evidence of platform heterogeneity for some metrics, not as clean causal estimates of platform moderation.
+Therefore, treat statistically supported platform differences as **exploratory evidence of heterogeneity**, not as clean causal estimates of platform moderation.
 
 ## Restrictions
 
@@ -230,7 +225,6 @@ Do not:
 
 - add new statistical tests;
 - change the bootstrap resampling unit;
-- resample Mobile and Desktop independently;
 - change the confidence interval method;
 - change metric formulas;
 - change `seed=42`;
@@ -239,9 +233,17 @@ Do not:
 - introduce new segmentation dimensions;
 - modify `01_overall_ab_test.ipynb`;
 - modify `02_platform_diagnostics.ipynb`;
-- modify existing JSON outputs;
-- modify existing AI reviewer files.
+- modify existing AI reviewer files;
+- modify any existing JSON output other than:
+  `outputs/platform_interaction_results.json`.
 
-Only modify `03_platform_interaction.ipynb` when executing this instruction.
+When executing this instruction, only modify:
 
-Before making code changes, briefly explain the planned implementation and confirm the metric configuration and bootstrap resampling unit.
+- `03_platform_interaction.ipynb`;
+- `outputs/platform_interaction_results.json`.
+
+Before making code changes, briefly confirm:
+
+- the five metric definitions;
+- bootstrap unit: `date × publisher_id`;
+- one common cluster draw for Mobile and Desktop.
