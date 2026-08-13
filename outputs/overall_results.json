@@ -1,0 +1,57 @@
+{
+  "RPM": {
+    "metric_a": 1.5637312589801027,
+    "metric_b": 1.8062376971847658,
+    "absolute_difference": 0.2425064382046631,
+    "relative_difference_pct": 15.508191501065905,
+    "lower_bound": 0.12261366169178592,
+    "upper_bound": 0.3816176301317727,
+    "n_blocks": 63,
+    "expected_direction": "increase",
+    "significant": true
+  },
+  "RPS": {
+    "metric_a": 2.750854250713099,
+    "metric_b": 3.038968116656121,
+    "absolute_difference": 0.2881138659430218,
+    "relative_difference_pct": 10.473614364277362,
+    "lower_bound": 0.09705264980916126,
+    "upper_bound": 0.5014712480362299,
+    "n_blocks": 63,
+    "expected_direction": "increase",
+    "significant": true
+  },
+  "Paid CTR": {
+    "metric_a": 6.019677250796504,
+    "metric_b": 7.352678153185763,
+    "absolute_difference": 1.3330009023892586,
+    "relative_difference_pct": 22.144059338278986,
+    "lower_bound": 1.0657170989013331,
+    "upper_bound": 1.6175309398200555,
+    "n_blocks": 63,
+    "expected_direction": "increase",
+    "significant": true
+  },
+  "Organic CTR": {
+    "metric_a": 20.65115068610129,
+    "metric_b": 10.82588810438367,
+    "absolute_difference": -9.825262581717618,
+    "relative_difference_pct": -47.57731291133454,
+    "lower_bound": -10.281374561795046,
+    "upper_bound": -9.367329520970735,
+    "n_blocks": 63,
+    "expected_direction": "decrease",
+    "significant": true
+  },
+  "Pages per Session": {
+    "metric_a": 1.7591604918784207,
+    "metric_b": 1.682485157624996,
+    "absolute_difference": -0.07667533425342477,
+    "relative_difference_pct": -4.358632120685668,
+    "lower_bound": -0.11015971413874644,
+    "upper_bound": -0.05125299745613567,
+    "n_blocks": 63,
+    "expected_direction": "decrease",
+    "significant": true
+  }
+}
