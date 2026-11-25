@@ -1,4 +1,4 @@
-# A/B Test Analysis — Marketpele Feed Ranking
+# A/B Test Analysis — Marketplace Feed Ranking
 
 This project evaluates an A/B experiment that changed the ordering of paid and organic elements in a content feed.
 
