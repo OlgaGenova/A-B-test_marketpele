@@ -14,7 +14,8 @@ AI was added afterwards as a second analytical reviewer to compare its interpret
 
 ## Reports
 
-- **[Original A/B test report](./AB_test_Marketpele_Olga_Genova.pdf)**
+- **[A/B test report — Russian](./AB_test_Marketplace_Olga_Genova_RUS.pdf)**
+- **[A/B test report — English](./AB_test_Marketplace_Olga_Genova_EN.pdf)**
 - **[Final AI review](./outputs/final_ai_review.md)**
 - **[README before the AI extension](./outputs/README_beforeAIadded.md)**
 
@@ -25,7 +26,8 @@ AI was added afterwards as a second analytical reviewer to compare its interpret
 ├── 01_overall_ab_test.ipynb
 ├── 02_platform_diagnostics.ipynb
 ├── 03_platform_interaction.ipynb
-├── AB_test_Marketpele_Olga_Genova.pdf
+├── AB_test_Marketplace_Olga_Genova_RUS.pdf
+├── AB_test_Marketplace_Olga_Genova_EN.pdf
 ├── ai/
 │   ├── reviewer_instructions.md
 │   ├── run_review.md
